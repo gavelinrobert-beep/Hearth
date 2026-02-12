@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.1] - 2024-02-12
+
+### Security
+- **CRITICAL**: Updated multer dependency from 1.4.5-lts.1 to 2.0.2 to fix multiple DoS vulnerabilities
+  - Fixed: Denial of Service via unhandled exception from malformed requests
+  - Fixed: Denial of Service via unhandled exception
+  - Fixed: Denial of Service from maliciously crafted requests
+  - Fixed: Denial of Service via memory leaks from unclosed streams
+- Updated @types/multer to 2.0.0 for compatibility
+
+### Changed
+- Multer API remains backward compatible; no code changes required
+
 ## [1.0.0] - 2024-02-12
 
 ### Added

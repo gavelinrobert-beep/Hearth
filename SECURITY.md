@@ -8,6 +8,15 @@ Currently, the following versions of NoIDchat are being supported with security 
 | ------- | ------------------ |
 | 1.0.x   | :white_check_mark: |
 
+## Recent Security Updates
+
+### Version 1.0.1 (2024-02-12)
+- **Fixed**: Updated multer from 1.4.5-lts.1 to 2.0.2+ to address multiple DoS vulnerabilities
+  - CVE: Denial of Service via unhandled exception from malformed requests
+  - CVE: Denial of Service via memory leaks from unclosed streams
+  - CVE: Denial of Service from maliciously crafted requests
+  - All users should update to multer 2.0.2 or higher
+
 ## Reporting a Vulnerability
 
 If you discover a security vulnerability in NoIDchat, please follow these steps:

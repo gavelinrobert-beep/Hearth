@@ -2,8 +2,11 @@
 
 A full-stack Discord alternative with AI-powered moderation and assistant features. Built with modern technologies for real-time communication and scalability.
 
-![NoIDchat](https://img.shields.io/badge/version-1.0.0-blue)
+![NoIDchat](https://img.shields.io/badge/version-1.0.1-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
+![Security](https://img.shields.io/badge/security-patched-green)
+
+> **Security Update**: Version 1.0.1 includes critical security fixes for multer vulnerabilities. Please update immediately.
 
 ## 🚀 Features
 
