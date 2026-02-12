@@ -11,7 +11,7 @@ import channelRoutes from './routes/channels';
 import messageRoutes from './routes/messages';
 import dmRoutes from './routes/directMessages';
 import userRoutes from './routes/users';
-import { setupSocketHandlers } from './services/socket';
+import { setupSocketHandlers } from './sockets';
 import { connectRedis } from './config/redis';
 import rateLimit from 'express-rate-limit';
 
