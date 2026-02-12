@@ -1,11 +1,17 @@
 import { useEffect, useState } from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, useParams } from 'react-router-dom';
 import { getSocket } from '../services/socket';
 import api from '../services/api';
 import Sidebar from '../components/Sidebar';
 import ServerList from '../components/ServerList';
 import ChannelView from '../components/ChannelView';
 import DirectMessages from '../components/DirectMessages';
+
+function ChannelViewWrapper() {
+  const { channelId, serverId } = useParams();
+  if (!channelId || !serverId) return null;
+  return <ChannelView channelId={channelId} serverId={serverId} />;
+}
 
 export interface Server {
   id: string;
@@ -82,7 +88,7 @@ export default function Chat() {
           element={
             selectedServer?.channels[0] ? (
               <ChannelView
-                channel={selectedServer.channels[0]}
+                channelId={selectedServer.channels[0].id}
                 serverId={selectedServer.id}
               />
             ) : (
@@ -94,7 +100,7 @@ export default function Chat() {
         />
         <Route
           path="/server/:serverId/channel/:channelId"
-          element={<ChannelView channel={selectedServer?.channels[0]!} serverId={selectedServer?.id!} />}
+          element={<ChannelViewWrapper />}
         />
         <Route path="/dm" element={<DirectMessages />} />
       </Routes>

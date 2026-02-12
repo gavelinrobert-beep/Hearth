@@ -2,7 +2,6 @@ import { useEffect, useState, useRef } from 'react';
 import { Hash, Send, Paperclip } from 'lucide-react';
 import { format } from 'date-fns';
 import { getSocket } from '../services/socket';
-import { Channel } from '../pages/Chat';
 import api from '../services/api';
 import { useAuthStore } from '../services/authStore';
 
@@ -10,6 +9,7 @@ interface Message {
   id: string;
   content: string;
   userId: string;
+  channelId?: string;
   fileUrl?: string;
   moderated: boolean;
   createdAt: string;
@@ -20,12 +20,19 @@ interface Message {
   };
 }
 
+interface Channel {
+  id: string;
+  name: string;
+  type: string;
+}
+
 interface ChannelViewProps {
-  channel: Channel;
+  channelId: string;
   serverId: string;
 }
 
-export default function ChannelView({ channel, serverId }: ChannelViewProps) {
+export default function ChannelView({ channelId, serverId }: ChannelViewProps) {
+  const [channel, setChannel] = useState<Channel | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [typingUsers, setTypingUsers] = useState<string[]>([]);
@@ -35,49 +42,59 @@ export default function ChannelView({ channel, serverId }: ChannelViewProps) {
   const { user } = useAuthStore();
 
   useEffect(() => {
-    if (channel?.id) {
+    if (channelId) {
+      loadChannel();
       loadMessages();
       const socket = getSocket();
       
       if (socket) {
-        socket.emit('join-channel', channel.id);
+        socket.emit('join-channel', channelId);
 
         socket.on('new-message', (message: Message) => {
-          if (message.channelId === channel.id) {
+          if (message.channelId === channelId) {
             setMessages((prev) => [...prev, message]);
           }
         });
 
-        socket.on('user-typing', ({ username, channelId }) => {
-          if (channelId === channel.id && username !== user?.username) {
+        socket.on('user-typing', ({ username, channelId: typingChannelId }) => {
+          if (typingChannelId === channelId && username !== user?.username) {
             setTypingUsers((prev) => [...new Set([...prev, username])]);
           }
         });
 
-        socket.on('user-stopped-typing', ({ userId, channelId }) => {
-          if (channelId === channel.id) {
+        socket.on('user-stopped-typing', ({ userId, channelId: typingChannelId }) => {
+          if (typingChannelId === channelId) {
             setTypingUsers((prev) => prev.filter((u) => u !== userId));
           }
         });
 
         return () => {
-          socket.emit('leave-channel', channel.id);
+          socket.emit('leave-channel', channelId);
           socket.off('new-message');
           socket.off('user-typing');
           socket.off('user-stopped-typing');
         };
       }
     }
-  }, [channel?.id, user?.username]);
+  }, [channelId, user?.username]);
 
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
 
+  const loadChannel = async () => {
+    try {
+      const response = await api.get(`/channels/${channelId}`);
+      setChannel(response.data);
+    } catch (error) {
+      console.error('Failed to load channel:', error);
+    }
+  };
+
   const loadMessages = async () => {
     try {
       setLoading(true);
-      const response = await api.get(`/messages/channel/${channel.id}`);
+      const response = await api.get(`/messages/channel/${channelId}`);
       setMessages(response.data);
     } catch (error) {
       console.error('Failed to load messages:', error);
@@ -92,12 +109,12 @@ export default function ChannelView({ channel, serverId }: ChannelViewProps) {
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newMessage.trim()) return;
+    if (!newMessage.trim() || !channelId) return;
 
     const socket = getSocket();
     if (socket) {
       socket.emit('send-message', {
-        channelId: channel.id,
+        channelId: channelId,
         content: newMessage,
       });
       setNewMessage('');
@@ -107,8 +124,8 @@ export default function ChannelView({ channel, serverId }: ChannelViewProps) {
 
   const handleTyping = () => {
     const socket = getSocket();
-    if (socket) {
-      socket.emit('typing-start', channel.id);
+    if (socket && channelId) {
+      socket.emit('typing-start', channelId);
 
       if (typingTimeoutRef.current) {
         clearTimeout(typingTimeoutRef.current);
@@ -122,15 +139,15 @@ export default function ChannelView({ channel, serverId }: ChannelViewProps) {
 
   const handleTypingStop = () => {
     const socket = getSocket();
-    if (socket) {
-      socket.emit('typing-stop', channel.id);
+    if (socket && channelId) {
+      socket.emit('typing-stop', channelId);
     }
     if (typingTimeoutRef.current) {
       clearTimeout(typingTimeoutRef.current);
     }
   };
 
-  if (loading) {
+  if (loading || !channel) {
     return (
       <div className="flex-1 flex items-center justify-center">
         <div className="text-gray-400">Loading messages...</div>
