@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuthStore } from '../services/authStore';
+import { useAuthStore } from '../store/authStore';
 import api from '../services/api';
 import { initSocket } from '../services/socket';
 

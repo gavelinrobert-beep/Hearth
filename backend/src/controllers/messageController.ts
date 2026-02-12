@@ -2,14 +2,15 @@ import { Request, Response } from 'express';
 import prisma from '../config/database';
 import { moderateContent } from '../services/aiModeration';
 
-export const getMessages = async (req: Request, res: Response) => {
+export const getMessages = async (req: Request, res: Response): Promise<void> => {
   try {
     const { channelId } = req.params;
     const { limit = '50', before } = req.query;
     const userId = req.user?.userId;
 
     if (!userId) {
-      return res.status(401).json({ error: 'Not authenticated' });
+      res.status(401).json({ error: 'Not authenticated' });
+      return;
     }
 
     // Check if user has access to channel
@@ -27,7 +28,8 @@ export const getMessages = async (req: Request, res: Response) => {
     });
 
     if (!channel) {
-      return res.status(404).json({ error: 'Channel not found' });
+      res.status(404).json({ error: 'Channel not found' });
+      return;
     }
 
     const messages = await prisma.message.findMany({
@@ -61,7 +63,7 @@ export const getMessages = async (req: Request, res: Response) => {
   }
 };
 
-export const createMessage = async (req: Request, res: Response) => {
+export const createMessage = async (req: Request, res: Response): Promise<void> => {
   try {
     const { channelId } = req.params;
     const { content } = req.body;
@@ -69,11 +71,13 @@ export const createMessage = async (req: Request, res: Response) => {
     const file = req.file;
 
     if (!userId) {
-      return res.status(401).json({ error: 'Not authenticated' });
+      res.status(401).json({ error: 'Not authenticated' });
+      return;
     }
 
     if (!content && !file) {
-      return res.status(400).json({ error: 'Message content or file required' });
+      res.status(400).json({ error: 'Message content or file required' });
+      return;
     }
 
     // Check if user has access to channel
@@ -91,7 +95,8 @@ export const createMessage = async (req: Request, res: Response) => {
     });
 
     if (!channel) {
-      return res.status(404).json({ error: 'Channel not found' });
+      res.status(404).json({ error: 'Channel not found' });
+      return;
     }
 
     // Moderate content with AI
@@ -123,13 +128,14 @@ export const createMessage = async (req: Request, res: Response) => {
   }
 };
 
-export const deleteMessage = async (req: Request, res: Response) => {
+export const deleteMessage = async (req: Request, res: Response): Promise<void> => {
   try {
     const { messageId } = req.params;
     const userId = req.user?.userId;
 
     if (!userId) {
-      return res.status(401).json({ error: 'Not authenticated' });
+      res.status(401).json({ error: 'Not authenticated' });
+      return;
     }
 
     const message = await prisma.message.findUnique({
@@ -144,12 +150,14 @@ export const deleteMessage = async (req: Request, res: Response) => {
     });
 
     if (!message) {
-      return res.status(404).json({ error: 'Message not found' });
+      res.status(404).json({ error: 'Message not found' });
+      return;
     }
 
     // Only message author or server owner can delete
     if (message.userId !== userId && message.channel.server.ownerId !== userId) {
-      return res.status(403).json({ error: 'Not authorized to delete this message' });
+      res.status(403).json({ error: 'Not authorized to delete this message' });
+      return;
     }
 
     await prisma.message.delete({

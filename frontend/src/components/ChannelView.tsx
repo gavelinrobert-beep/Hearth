@@ -3,7 +3,7 @@ import { Hash, Send, Paperclip } from 'lucide-react';
 import { format } from 'date-fns';
 import { getSocket } from '../services/socket';
 import api from '../services/api';
-import { useAuthStore } from '../services/authStore';
+import { useAuthStore } from '../store/authStore';
 
 interface Message {
   id: string;
@@ -31,14 +31,14 @@ interface ChannelViewProps {
   serverId: string;
 }
 
-export default function ChannelView({ channelId, serverId }: ChannelViewProps) {
+export default function ChannelView({ channelId, serverId: _serverId }: ChannelViewProps) {
   const [channel, setChannel] = useState<Channel | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [typingUsers, setTypingUsers] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const typingTimeoutRef = useRef<NodeJS.Timeout>();
+  const typingTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
   const { user } = useAuthStore();
 
   useEffect(() => {

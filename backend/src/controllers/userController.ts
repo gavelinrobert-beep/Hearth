@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import prisma from '../config/database';
 
-export const getUsers = async (req: Request, res: Response) => {
+export const getUsers = async (req: Request, res: Response): Promise<void> => {
   try {
     const { search } = req.query;
 
@@ -30,7 +30,7 @@ export const getUsers = async (req: Request, res: Response) => {
   }
 };
 
-export const getUserById = async (req: Request, res: Response) => {
+export const getUserById = async (req: Request, res: Response): Promise<void> => {
   try {
     const { userId } = req.params;
 
@@ -46,7 +46,8 @@ export const getUserById = async (req: Request, res: Response) => {
     });
 
     if (!user) {
-      return res.status(404).json({ error: 'User not found' });
+      res.status(404).json({ error: 'User not found' });
+      return;
     }
 
     res.json(user);
@@ -56,18 +57,20 @@ export const getUserById = async (req: Request, res: Response) => {
   }
 };
 
-export const updateUser = async (req: Request, res: Response) => {
+export const updateUser = async (req: Request, res: Response): Promise<void> => {
   try {
     const { userId } = req.params;
     const currentUserId = req.user?.userId;
     const { username, avatar, status } = req.body;
 
     if (!currentUserId) {
-      return res.status(401).json({ error: 'Not authenticated' });
+      res.status(401).json({ error: 'Not authenticated' });
+      return;
     }
 
     if (userId !== currentUserId) {
-      return res.status(403).json({ error: 'Can only update own profile' });
+      res.status(403).json({ error: 'Can only update own profile' });
+      return;
     }
 
     const updatedUser = await prisma.user.update({

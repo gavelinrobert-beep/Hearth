@@ -1,13 +1,14 @@
 import { Request, Response } from 'express';
 import prisma from '../config/database';
 
-export const createServer = async (req: Request, res: Response) => {
+export const createServer = async (req: Request, res: Response): Promise<void> => {
   try {
     const { name, icon } = req.body;
     const userId = req.user?.userId;
 
     if (!userId) {
-      return res.status(401).json({ error: 'Not authenticated' });
+      res.status(401).json({ error: 'Not authenticated' });
+      return;
     }
 
     const server = await prisma.server.create({
@@ -51,12 +52,13 @@ export const createServer = async (req: Request, res: Response) => {
   }
 };
 
-export const getServers = async (req: Request, res: Response) => {
+export const getServers = async (req: Request, res: Response): Promise<void> => {
   try {
     const userId = req.user?.userId;
 
     if (!userId) {
-      return res.status(401).json({ error: 'Not authenticated' });
+      res.status(401).json({ error: 'Not authenticated' });
+      return;
     }
 
     const servers = await prisma.server.findMany({
@@ -91,13 +93,14 @@ export const getServers = async (req: Request, res: Response) => {
   }
 };
 
-export const getServerById = async (req: Request, res: Response) => {
+export const getServerById = async (req: Request, res: Response): Promise<void> => {
   try {
     const { serverId } = req.params;
     const userId = req.user?.userId;
 
     if (!userId) {
-      return res.status(401).json({ error: 'Not authenticated' });
+      res.status(401).json({ error: 'Not authenticated' });
+      return;
     }
 
     const server = await prisma.server.findFirst({
@@ -129,7 +132,8 @@ export const getServerById = async (req: Request, res: Response) => {
     });
 
     if (!server) {
-      return res.status(404).json({ error: 'Server not found' });
+      res.status(404).json({ error: 'Server not found' });
+      return;
     }
 
     res.json(server);
@@ -139,14 +143,15 @@ export const getServerById = async (req: Request, res: Response) => {
   }
 };
 
-export const updateServer = async (req: Request, res: Response) => {
+export const updateServer = async (req: Request, res: Response): Promise<void> => {
   try {
     const { serverId } = req.params;
     const { name, icon } = req.body;
     const userId = req.user?.userId;
 
     if (!userId) {
-      return res.status(401).json({ error: 'Not authenticated' });
+      res.status(401).json({ error: 'Not authenticated' });
+      return;
     }
 
     const server = await prisma.server.findUnique({
@@ -154,11 +159,13 @@ export const updateServer = async (req: Request, res: Response) => {
     });
 
     if (!server) {
-      return res.status(404).json({ error: 'Server not found' });
+      res.status(404).json({ error: 'Server not found' });
+      return;
     }
 
     if (server.ownerId !== userId) {
-      return res.status(403).json({ error: 'Only server owner can update' });
+      res.status(403).json({ error: 'Only server owner can update' });
+      return;
     }
 
     const updatedServer = await prisma.server.update({
@@ -188,13 +195,14 @@ export const updateServer = async (req: Request, res: Response) => {
   }
 };
 
-export const deleteServer = async (req: Request, res: Response) => {
+export const deleteServer = async (req: Request, res: Response): Promise<void> => {
   try {
     const { serverId } = req.params;
     const userId = req.user?.userId;
 
     if (!userId) {
-      return res.status(401).json({ error: 'Not authenticated' });
+      res.status(401).json({ error: 'Not authenticated' });
+      return;
     }
 
     const server = await prisma.server.findUnique({
@@ -202,11 +210,13 @@ export const deleteServer = async (req: Request, res: Response) => {
     });
 
     if (!server) {
-      return res.status(404).json({ error: 'Server not found' });
+      res.status(404).json({ error: 'Server not found' });
+      return;
     }
 
     if (server.ownerId !== userId) {
-      return res.status(403).json({ error: 'Only server owner can delete' });
+      res.status(403).json({ error: 'Only server owner can delete' });
+      return;
     }
 
     await prisma.server.delete({
@@ -220,13 +230,14 @@ export const deleteServer = async (req: Request, res: Response) => {
   }
 };
 
-export const joinServer = async (req: Request, res: Response) => {
+export const joinServer = async (req: Request, res: Response): Promise<void> => {
   try {
     const { serverId } = req.params;
     const userId = req.user?.userId;
 
     if (!userId) {
-      return res.status(401).json({ error: 'Not authenticated' });
+      res.status(401).json({ error: 'Not authenticated' });
+      return;
     }
 
     const server = await prisma.server.findUnique({
@@ -234,7 +245,8 @@ export const joinServer = async (req: Request, res: Response) => {
     });
 
     if (!server) {
-      return res.status(404).json({ error: 'Server not found' });
+      res.status(404).json({ error: 'Server not found' });
+      return;
     }
 
     const existingMember = await prisma.serverMember.findUnique({
@@ -247,7 +259,8 @@ export const joinServer = async (req: Request, res: Response) => {
     });
 
     if (existingMember) {
-      return res.status(400).json({ error: 'Already a member' });
+      res.status(400).json({ error: 'Already a member' });
+      return;
     }
 
     await prisma.serverMember.create({
@@ -283,13 +296,14 @@ export const joinServer = async (req: Request, res: Response) => {
   }
 };
 
-export const leaveServer = async (req: Request, res: Response) => {
+export const leaveServer = async (req: Request, res: Response): Promise<void> => {
   try {
     const { serverId } = req.params;
     const userId = req.user?.userId;
 
     if (!userId) {
-      return res.status(401).json({ error: 'Not authenticated' });
+      res.status(401).json({ error: 'Not authenticated' });
+      return;
     }
 
     const server = await prisma.server.findUnique({
@@ -297,11 +311,13 @@ export const leaveServer = async (req: Request, res: Response) => {
     });
 
     if (!server) {
-      return res.status(404).json({ error: 'Server not found' });
+      res.status(404).json({ error: 'Server not found' });
+      return;
     }
 
     if (server.ownerId === userId) {
-      return res.status(400).json({ error: 'Owner cannot leave server' });
+      res.status(400).json({ error: 'Owner cannot leave server' });
+      return;
     }
 
     await prisma.serverMember.delete({

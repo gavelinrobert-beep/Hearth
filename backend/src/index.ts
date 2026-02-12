@@ -11,7 +11,7 @@ import channelRoutes from './routes/channels';
 import messageRoutes from './routes/messages';
 import dmRoutes from './routes/directMessages';
 import userRoutes from './routes/users';
-import { setupSocketHandlers } from './services/socket';
+import { setupSocketHandlers } from './sockets';
 import { connectRedis } from './config/redis';
 import rateLimit from 'express-rate-limit';
 
@@ -56,7 +56,7 @@ app.use('/api/dm', dmRoutes);
 app.use('/api/users', userRoutes);
 
 // Health check
-app.get('/health', (req, res) => {
+app.get('/health', (_req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
@@ -64,7 +64,7 @@ app.get('/health', (req, res) => {
 setupSocketHandlers(io);
 
 // Error handling middleware
-app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
   console.error('Error:', err);
   res.status(err.status || 500).json({
     error: err.message || 'Internal Server Error',

@@ -1,13 +1,14 @@
 import { Request, Response } from 'express';
 import prisma from '../config/database';
 
-export const createChannel = async (req: Request, res: Response) => {
+export const createChannel = async (req: Request, res: Response): Promise<void> => {
   try {
     const { name, type, serverId } = req.body;
     const userId = req.user?.userId;
 
     if (!userId) {
-      return res.status(401).json({ error: 'Not authenticated' });
+      res.status(401).json({ error: 'Not authenticated' });
+      return;
     }
 
     // Check if user is server owner
@@ -16,11 +17,13 @@ export const createChannel = async (req: Request, res: Response) => {
     });
 
     if (!server) {
-      return res.status(404).json({ error: 'Server not found' });
+      res.status(404).json({ error: 'Server not found' });
+      return;
     }
 
     if (server.ownerId !== userId) {
-      return res.status(403).json({ error: 'Only server owner can create channels' });
+      res.status(403).json({ error: 'Only server owner can create channels' });
+      return;
     }
 
     const channel = await prisma.channel.create({
@@ -38,13 +41,14 @@ export const createChannel = async (req: Request, res: Response) => {
   }
 };
 
-export const getChannelById = async (req: Request, res: Response) => {
+export const getChannelById = async (req: Request, res: Response): Promise<void> => {
   try {
     const { channelId } = req.params;
     const userId = req.user?.userId;
 
     if (!userId) {
-      return res.status(401).json({ error: 'Not authenticated' });
+      res.status(401).json({ error: 'Not authenticated' });
+      return;
     }
 
     const channel = await prisma.channel.findFirst({
@@ -69,7 +73,8 @@ export const getChannelById = async (req: Request, res: Response) => {
     });
 
     if (!channel) {
-      return res.status(404).json({ error: 'Channel not found' });
+      res.status(404).json({ error: 'Channel not found' });
+      return;
     }
 
     res.json(channel);
@@ -79,14 +84,15 @@ export const getChannelById = async (req: Request, res: Response) => {
   }
 };
 
-export const updateChannel = async (req: Request, res: Response) => {
+export const updateChannel = async (req: Request, res: Response): Promise<void> => {
   try {
     const { channelId } = req.params;
     const { name } = req.body;
     const userId = req.user?.userId;
 
     if (!userId) {
-      return res.status(401).json({ error: 'Not authenticated' });
+      res.status(401).json({ error: 'Not authenticated' });
+      return;
     }
 
     const channel = await prisma.channel.findUnique({
@@ -97,11 +103,13 @@ export const updateChannel = async (req: Request, res: Response) => {
     });
 
     if (!channel) {
-      return res.status(404).json({ error: 'Channel not found' });
+      res.status(404).json({ error: 'Channel not found' });
+      return;
     }
 
     if (channel.server.ownerId !== userId) {
-      return res.status(403).json({ error: 'Only server owner can update channels' });
+      res.status(403).json({ error: 'Only server owner can update channels' });
+      return;
     }
 
     const updatedChannel = await prisma.channel.update({
@@ -116,13 +124,14 @@ export const updateChannel = async (req: Request, res: Response) => {
   }
 };
 
-export const deleteChannel = async (req: Request, res: Response) => {
+export const deleteChannel = async (req: Request, res: Response): Promise<void> => {
   try {
     const { channelId } = req.params;
     const userId = req.user?.userId;
 
     if (!userId) {
-      return res.status(401).json({ error: 'Not authenticated' });
+      res.status(401).json({ error: 'Not authenticated' });
+      return;
     }
 
     const channel = await prisma.channel.findUnique({
@@ -133,11 +142,13 @@ export const deleteChannel = async (req: Request, res: Response) => {
     });
 
     if (!channel) {
-      return res.status(404).json({ error: 'Channel not found' });
+      res.status(404).json({ error: 'Channel not found' });
+      return;
     }
 
     if (channel.server.ownerId !== userId) {
-      return res.status(403).json({ error: 'Only server owner can delete channels' });
+      res.status(403).json({ error: 'Only server owner can delete channels' });
+      return;
     }
 
     await prisma.channel.delete({
