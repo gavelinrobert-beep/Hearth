@@ -8,6 +8,19 @@ import redisClient from '../config/redis';
  */
 
 /**
+ * Create a RedisStore instance with proper typing
+ * Note: Using type assertion due to compatibility issues between redis v4 and rate-limit-redis
+ * The rate-limit-redis library expects redis v3 client but we're using v4
+ */
+function createRedisStore(prefix: string): any {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return new (RedisStore as any)({
+    client: redisClient,
+    prefix,
+  });
+}
+
+/**
  * General API rate limiter
  * Limits: 100 requests per 15 minutes per IP
  */
@@ -17,11 +30,7 @@ export const apiLimiter = rateLimit({
   message: 'Too many requests from this IP, please try again later.',
   standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
   legacyHeaders: false, // Disable the `X-RateLimit-*` headers
-  store: new RedisStore({
-    // @ts-expect-error - RedisStore typing issue with redis v4
-    client: redisClient,
-    prefix: 'rl:api:',
-  }),
+  store: createRedisStore('rl:api:'),
 });
 
 /**
@@ -36,11 +45,7 @@ export const authLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   skipSuccessfulRequests: true, // Don't count successful logins against the limit
-  store: new RedisStore({
-    // @ts-expect-error - RedisStore typing issue with redis v4
-    client: redisClient,
-    prefix: 'rl:auth:',
-  }),
+  store: createRedisStore('rl:auth:'),
 });
 
 /**
@@ -54,11 +59,7 @@ export const messageLimiter = rateLimit({
   message: 'You are sending messages too quickly. Please slow down.',
   standardHeaders: true,
   legacyHeaders: false,
-  store: new RedisStore({
-    // @ts-expect-error - RedisStore typing issue with redis v4
-    client: redisClient,
-    prefix: 'rl:msg:',
-  }),
+  store: createRedisStore('rl:msg:'),
 });
 
 /**
@@ -72,9 +73,5 @@ export const uploadLimiter = rateLimit({
   message: 'Too many file uploads, please try again later.',
   standardHeaders: true,
   legacyHeaders: false,
-  store: new RedisStore({
-    // @ts-expect-error - RedisStore typing issue with redis v4
-    client: redisClient,
-    prefix: 'rl:upload:',
-  }),
+  store: createRedisStore('rl:upload:'),
 });

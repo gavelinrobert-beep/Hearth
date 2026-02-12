@@ -1,6 +1,7 @@
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
+import type { Request, Response, NextFunction } from 'express';
 
 /**
  * Multer File Upload Middleware
@@ -35,7 +36,11 @@ const storage = multer.diskStorage({
  * File filter to validate uploaded files
  * Accepts images, videos, audio, and documents
  */
-const fileFilter = (_req: any, file: Express.Multer.File, cb: multer.FileFilterCallback): void => {
+const fileFilter = (
+  _req: Request,
+  file: Express.Multer.File,
+  cb: multer.FileFilterCallback
+): void => {
   // Allowed file types
   const allowedMimeTypes = [
     // Images
@@ -103,7 +108,11 @@ export const uploadMultiple = multer(uploadConfig).array('files', 5);
  */
 export const uploadAvatar = multer({
   storage,
-  fileFilter: (_req: any, file: Express.Multer.File, cb: multer.FileFilterCallback): void => {
+  fileFilter: (
+    _req: Request,
+    file: Express.Multer.File,
+    cb: multer.FileFilterCallback
+  ): void => {
     const allowedMimeTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
     if (allowedMimeTypes.includes(file.mimetype)) {
       cb(null, true);
@@ -120,7 +129,12 @@ export const uploadAvatar = multer({
 /**
  * Error handler for multer errors
  */
-export const handleUploadError = (error: any, _req: any, res: any, next: any): void => {
+export const handleUploadError = (
+  error: any,
+  _req: Request,
+  res: Response,
+  next: NextFunction
+): void => {
   if (error instanceof multer.MulterError) {
     if (error.code === 'LIMIT_FILE_SIZE') {
       res.status(413).json({ error: 'File too large' });
