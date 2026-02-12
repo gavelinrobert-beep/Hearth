@@ -31,14 +31,14 @@ interface ChannelViewProps {
   serverId: string;
 }
 
-export default function ChannelView({ channelId, serverId }: ChannelViewProps) {
+export default function ChannelView({ channelId }: ChannelViewProps) {
   const [channel, setChannel] = useState<Channel | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [typingUsers, setTypingUsers] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const typingTimeoutRef = useRef<NodeJS.Timeout>();
+  const typingTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
   const { user } = useAuthStore();
 
   useEffect(() => {

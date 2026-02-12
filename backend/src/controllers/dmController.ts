@@ -1,14 +1,15 @@
 import { Request, Response } from 'express';
 import prisma from '../config/database';
 
-export const getDirectMessages = async (req: Request, res: Response) => {
+export const getDirectMessages = async (req: Request, res: Response): Promise<void> => {
   try {
     const { userId: otherUserId } = req.params;
     const userId = req.user?.userId;
     const { limit = '50', before } = req.query;
 
     if (!userId) {
-      return res.status(401).json({ error: 'Not authenticated' });
+      res.status(401).json({ error: 'Not authenticated' });
+      return;
     }
 
     const messages = await prisma.directMessage.findMany({
@@ -45,18 +46,20 @@ export const getDirectMessages = async (req: Request, res: Response) => {
   }
 };
 
-export const sendDirectMessage = async (req: Request, res: Response) => {
+export const sendDirectMessage = async (req: Request, res: Response): Promise<void> => {
   try {
     const { userId: receiverId } = req.params;
     const { content } = req.body;
     const senderId = req.user?.userId;
 
     if (!senderId) {
-      return res.status(401).json({ error: 'Not authenticated' });
+      res.status(401).json({ error: 'Not authenticated' });
+      return;
     }
 
     if (!content) {
-      return res.status(400).json({ error: 'Message content required' });
+      res.status(400).json({ error: 'Message content required' });
+      return;
     }
 
     // Check if receiver exists
@@ -65,7 +68,8 @@ export const sendDirectMessage = async (req: Request, res: Response) => {
     });
 
     if (!receiver) {
-      return res.status(404).json({ error: 'User not found' });
+      res.status(404).json({ error: 'User not found' });
+      return;
     }
 
     const message = await prisma.directMessage.create({
@@ -92,13 +96,14 @@ export const sendDirectMessage = async (req: Request, res: Response) => {
   }
 };
 
-export const markAsRead = async (req: Request, res: Response) => {
+export const markAsRead = async (req: Request, res: Response): Promise<void> => {
   try {
     const { messageId } = req.params;
     const userId = req.user?.userId;
 
     if (!userId) {
-      return res.status(401).json({ error: 'Not authenticated' });
+      res.status(401).json({ error: 'Not authenticated' });
+      return;
     }
 
     const message = await prisma.directMessage.findUnique({
@@ -106,11 +111,13 @@ export const markAsRead = async (req: Request, res: Response) => {
     });
 
     if (!message) {
-      return res.status(404).json({ error: 'Message not found' });
+      res.status(404).json({ error: 'Message not found' });
+      return;
     }
 
     if (message.receiverId !== userId) {
-      return res.status(403).json({ error: 'Not authorized' });
+      res.status(403).json({ error: 'Not authorized' });
+      return;
     }
 
     const updatedMessage = await prisma.directMessage.update({
