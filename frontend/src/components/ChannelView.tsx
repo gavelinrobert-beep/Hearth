@@ -3,7 +3,7 @@ import { Hash, Send, Paperclip } from 'lucide-react';
 import { format } from 'date-fns';
 import { getSocket } from '../services/socket';
 import api from '../services/api';
-import { useAuthStore } from '../services/authStore';
+import { useAuthStore } from '../store/authStore';
 
 interface Message {
   id: string;

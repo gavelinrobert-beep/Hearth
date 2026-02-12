@@ -1,5 +1,6 @@
 import { useCallback } from 'react';
-import { useAuthStore, User } from '../services/authStore';
+import { useAuthStore } from '../store/authStore';
+import { User } from '../types';
 import api from '../services/api';
 import { initSocket, disconnectSocket } from '../services/socket';
 

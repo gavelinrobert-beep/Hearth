@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { Socket } from 'socket.io-client';
 import { initSocket, getSocket, disconnectSocket } from '../services/socket';
-import { useAuthStore } from '../services/authStore';
+import { useAuthStore } from '../store/authStore';
 import { Message } from '../types';
 
 interface TypingData {
