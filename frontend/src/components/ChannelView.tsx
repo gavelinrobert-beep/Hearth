@@ -31,7 +31,7 @@ interface ChannelViewProps {
   serverId: string;
 }
 
-export default function ChannelView({ channelId }: ChannelViewProps) {
+export default function ChannelView({ channelId, serverId: _serverId }: ChannelViewProps) {
   const [channel, setChannel] = useState<Channel | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
