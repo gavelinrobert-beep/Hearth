@@ -169,6 +169,10 @@ export function setupVoiceHandlers(io: Server, socket: AuthenticatedSocket) {
     try {
       const { channelId, direction } = data;
 
+      if (!socket.userId) {
+        return callback({ error: 'Not authenticated' });
+      }
+
       const room = roomManager.getRoom(channelId);
       if (!room) {
         return callback({ error: 'Not in voice channel' });
@@ -193,6 +197,10 @@ export function setupVoiceHandlers(io: Server, socket: AuthenticatedSocket) {
     try {
       const { channelId, transportId, dtlsParameters } = data;
 
+      if (!socket.userId) {
+        return callback({ error: 'Not authenticated' });
+      }
+
       const room = roomManager.getRoom(channelId);
       if (!room) {
         return callback({ error: 'Not in voice channel' });
@@ -213,6 +221,10 @@ export function setupVoiceHandlers(io: Server, socket: AuthenticatedSocket) {
   socket.on('voice-produce', async (data, callback) => {
     try {
       const { channelId, transportId, kind, rtpParameters } = data;
+
+      if (!socket.userId) {
+        return callback({ error: 'Not authenticated' });
+      }
 
       const room = roomManager.getRoom(channelId);
       if (!room) {
@@ -246,6 +258,10 @@ export function setupVoiceHandlers(io: Server, socket: AuthenticatedSocket) {
     try {
       const { channelId, producerUserId, transportId } = data;
 
+      if (!socket.userId) {
+        return callback({ error: 'Not authenticated' });
+      }
+
       const room = roomManager.getRoom(channelId);
       if (!room) {
         return callback({ error: 'Not in voice channel' });
@@ -271,7 +287,8 @@ export function setupVoiceHandlers(io: Server, socket: AuthenticatedSocket) {
     if (!socket.userId) return;
     
     // Find all rooms this user is in and remove them
-    for (const [channelId, room] of roomManager.rooms.entries()) {
+    const allRooms = roomManager.getAllRooms();
+    for (const { channelId, room } of allRooms) {
       if (room.getParticipant(socket.userId)) {
         room.removeParticipant(socket.userId);
 

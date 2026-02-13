@@ -252,6 +252,16 @@ class RoomManager {
   }
 
   /**
+   * Get all rooms for cleanup or iteration
+   */
+  getAllRooms() {
+    return Array.from(this.rooms.entries()).map(([channelId, room]) => ({
+      channelId,
+      room,
+    }));
+  }
+
+  /**
    * Close all rooms
    */
   closeAll() {

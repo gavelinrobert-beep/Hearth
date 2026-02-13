@@ -66,10 +66,8 @@ export function useVoice() {
     voiceServiceRef.current = voiceService;
 
     return () => {
-      // Cleanup on unmount
-      (async () => {
-        await voiceService.destroy();
-      })();
+      // Cleanup on unmount - fire and forget since React cleanup can't be async
+      voiceService.destroy().catch((err) => console.error('Error during cleanup:', err));
       voiceServiceRef.current = null;
     };
   }, []);
