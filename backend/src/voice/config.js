@@ -2,8 +2,6 @@
  * mediasoup configuration for WebRTC voice channels
  */
 
-const os = require('os');
-
 const config = {
   // mediasoup worker settings
   worker: {
