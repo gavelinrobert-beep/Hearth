@@ -4,6 +4,7 @@ import prisma from '../config/database';
 import { setupMessageHandlers } from './messageHandler';
 import { setupPresenceHandlers } from './presenceHandler';
 import { setupTypingHandlers } from './typingHandler';
+import { setupVoiceHandlers } from './voiceHandler';
 
 export interface AuthenticatedSocket extends Socket {
   userId?: string;
@@ -61,6 +62,7 @@ export function setupSocketHandlers(io: Server) {
     setupMessageHandlers(io, socket);
     setupTypingHandlers(io, socket);
     setupPresenceHandlers(io, socket, servers);
+    setupVoiceHandlers(io, socket);
   });
 
   return io;

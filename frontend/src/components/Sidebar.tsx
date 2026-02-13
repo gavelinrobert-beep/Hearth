@@ -4,6 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import { Server } from '../pages/Chat';
 import { useAuthStore } from '../store/authStore';
 import api from '../services/api';
+import VoiceChannel from './Voice/VoiceChannel';
+import VoiceControls from './Voice/VoiceControls';
 
 interface SidebarProps {
   server: Server;
@@ -77,13 +79,7 @@ export default function Sidebar({ server, onServerUpdate }: SidebarProps) {
             {server.channels
               .filter((channel) => channel.type === 'voice')
               .map((channel) => (
-                <button
-                  key={channel.id}
-                  className="w-full flex items-center gap-2 px-2 py-1.5 rounded hover:bg-dark-700 text-gray-300 hover:text-gray-100 transition"
-                >
-                  <Volume2 size={18} />
-                  <span>{channel.name}</span>
-                </button>
+                <VoiceChannel key={channel.id} channel={channel} />
               ))}
           </div>
         </div>
@@ -96,6 +92,7 @@ export default function Sidebar({ server, onServerUpdate }: SidebarProps) {
             <div className="text-sm font-semibold truncate">{user?.username}</div>
             <div className="text-xs text-gray-400">Online</div>
           </div>
+          <VoiceControls />
         </div>
       </div>
 
