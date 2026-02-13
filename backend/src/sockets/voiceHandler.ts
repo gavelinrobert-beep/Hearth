@@ -118,7 +118,7 @@ export function setupVoiceHandlers(io: Server, socket: AuthenticatedSocket) {
 
       // Return existing participants
       const participants = room.getParticipants().filter(
-        (p) => p.userId !== socket.userId
+        (p: any) => p.userId !== socket.userId
       );
 
       callback({ participants });

@@ -2,13 +2,16 @@
  * VoiceChannel component for displaying and interacting with voice channels
  */
 
-import { Volume2, Phone, PhoneOff, Mic, MicOff, Users } from 'lucide-react';
-import { Channel } from '../../types';
+import { Volume2, PhoneOff, Mic, MicOff, Users } from 'lucide-react';
 import { useVoice } from '../../hooks/useVoice';
 import { useAuthStore } from '../../store/authStore';
 
 interface VoiceChannelProps {
-  channel: Channel;
+  channel: {
+    id: string;
+    name: string;
+    type: string;
+  };
 }
 
 export default function VoiceChannel({ channel }: VoiceChannelProps) {

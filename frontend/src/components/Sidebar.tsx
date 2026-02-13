@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Hash, Volume2, Plus, Settings } from 'lucide-react';
+import { Hash, Plus, Settings } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Server } from '../pages/Chat';
 import { useAuthStore } from '../store/authStore';

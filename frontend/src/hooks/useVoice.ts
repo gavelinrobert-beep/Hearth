@@ -4,7 +4,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { VoiceService } from '../services/voice';
-import { VoiceState, VoiceParticipant } from '../types';
+import { VoiceState } from '../types';
 import { getSocket } from '../services/socket';
 
 export function useVoice() {

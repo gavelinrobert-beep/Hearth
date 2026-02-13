@@ -2,10 +2,14 @@
  * VoiceService handles WebRTC connections using mediasoup-client
  */
 
-import { Device } from 'mediasoup-client';
-import { Transport, Producer, Consumer } from 'mediasoup-client/lib/types';
+import * as mediasoupClient from 'mediasoup-client';
 import { Socket } from 'socket.io-client';
 import { VoiceParticipant } from '../types';
+
+type Device = mediasoupClient.types.Device;
+type Transport = mediasoupClient.types.Transport;
+type Producer = mediasoupClient.types.Producer;
+type Consumer = mediasoupClient.types.Consumer;
 
 interface VoiceCallbacks {
   onUserJoined?: (participant: VoiceParticipant) => void;
@@ -27,7 +31,7 @@ export class VoiceService {
   private callbacks: VoiceCallbacks = {};
 
   constructor() {
-    this.device = new Device();
+    this.device = new mediasoupClient.Device();
   }
 
   /**
@@ -205,7 +209,7 @@ export class VoiceService {
 
     this.sendTransport = this.device!.createSendTransport(transportOptions);
 
-    this.sendTransport.on('connect', async ({ dtlsParameters }, callback, errback) => {
+    this.sendTransport.on('connect', async ({ dtlsParameters }: any, callback: any, errback: any) => {
       try {
         const { error } = await this.socketRequest('voice-connect-transport', {
           channelId,
@@ -223,7 +227,7 @@ export class VoiceService {
       }
     });
 
-    this.sendTransport.on('produce', async ({ kind, rtpParameters }, callback, errback) => {
+    this.sendTransport.on('produce', async ({ kind, rtpParameters }: any, callback: any, errback: any) => {
       try {
         const { producerId, error } = await this.socketRequest('voice-produce', {
           channelId,
@@ -258,7 +262,7 @@ export class VoiceService {
 
     this.recvTransport = this.device!.createRecvTransport(transportOptions);
 
-    this.recvTransport.on('connect', async ({ dtlsParameters }, callback, errback) => {
+    this.recvTransport.on('connect', async ({ dtlsParameters }: any, callback: any, errback: any) => {
       try {
         const { error } = await this.socketRequest('voice-connect-transport', {
           channelId,
