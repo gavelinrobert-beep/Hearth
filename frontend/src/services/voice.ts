@@ -26,6 +26,7 @@ export class VoiceService {
   private recvTransport: Transport | null = null;
   private producer: Producer | null = null;
   private consumers: Map<string, Consumer> = new Map();
+  private audioElements: Map<string, HTMLAudioElement> = new Map();
   private audioStream: MediaStream | null = null;
   private currentChannelId: string | null = null;
   private callbacks: VoiceCallbacks = {};
@@ -58,11 +59,20 @@ export class VoiceService {
       console.log('User left voice:', data);
       this.callbacks.onUserLeft?.(data.userId);
       
-      // Close consumer for this user
+      // Close consumer and audio element for this user
       this.consumers.forEach((consumer, consumerId) => {
         if (consumer.appData.userId === data.userId) {
           consumer.close();
           this.consumers.delete(consumerId);
+          
+          // Cleanup audio element
+          const audio = this.audioElements.get(consumerId);
+          if (audio) {
+            audio.pause();
+            audio.srcObject = null;
+            audio.remove();
+            this.audioElements.delete(consumerId);
+          }
         }
       });
     });
@@ -173,6 +183,14 @@ export class VoiceService {
       // Close consumers
       this.consumers.forEach((consumer) => consumer.close());
       this.consumers.clear();
+
+      // Stop and remove all audio elements
+      this.audioElements.forEach((audio) => {
+        audio.pause();
+        audio.srcObject = null;
+        audio.remove();
+      });
+      this.audioElements.clear();
 
       // Close transports
       if (this.sendTransport) {
@@ -332,6 +350,8 @@ export class VoiceService {
       audio.srcObject = stream;
       audio.play().catch((err) => console.error('Error playing audio:', err));
 
+      // Track audio element for cleanup
+      this.audioElements.set(consumer.id, audio);
       this.consumers.set(consumer.id, consumer);
       console.log('Audio consumer created:', consumer.id);
     } catch (error) {
@@ -373,8 +393,8 @@ export class VoiceService {
   /**
    * Cleanup
    */
-  destroy() {
-    this.leaveChannel();
+  async destroy() {
+    await this.leaveChannel();
     this.socket = null;
     this.callbacks = {};
   }

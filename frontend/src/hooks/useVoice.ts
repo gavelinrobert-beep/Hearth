@@ -66,7 +66,10 @@ export function useVoice() {
     voiceServiceRef.current = voiceService;
 
     return () => {
-      voiceService.destroy();
+      // Cleanup on unmount
+      (async () => {
+        await voiceService.destroy();
+      })();
       voiceServiceRef.current = null;
     };
   }, []);
@@ -101,9 +104,10 @@ export function useVoice() {
   }, []);
 
   const toggleMute = useCallback(() => {
-    if (!voiceState || !voiceServiceRef.current) return;
+    if (!voiceServiceRef.current) return;
 
-    const newMutedState = !voiceState.isMuted;
+    const currentMuted = voiceServiceRef.current.isMuted();
+    const newMutedState = !currentMuted;
     voiceServiceRef.current.setMuted(newMutedState);
     
     setVoiceState((prev) => {
@@ -113,7 +117,7 @@ export function useVoice() {
         isMuted: newMutedState,
       };
     });
-  }, [voiceState]);
+  }, []);
 
   return {
     voiceState,

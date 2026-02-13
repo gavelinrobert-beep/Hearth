@@ -135,9 +135,13 @@ export function setupVoiceHandlers(io: Server, socket: AuthenticatedSocket) {
     try {
       const { channelId } = data;
 
+      if (!socket.userId) {
+        return callback({ error: 'Not authenticated' });
+      }
+
       const room = roomManager.getRoom(channelId);
       if (room) {
-        room.removeParticipant(socket.userId!);
+        room.removeParticipant(socket.userId);
 
         // Leave socket room
         socket.leave(`voice:${channelId}`);
@@ -264,6 +268,8 @@ export function setupVoiceHandlers(io: Server, socket: AuthenticatedSocket) {
    * Handle disconnect - cleanup voice state
    */
   socket.on('disconnect', async () => {
+    if (!socket.userId) return;
+    
     // Find all rooms this user is in and remove them
     for (const [channelId, room] of roomManager.rooms.entries()) {
       if (room.getParticipant(socket.userId)) {
