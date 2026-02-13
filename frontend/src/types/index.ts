@@ -55,3 +55,18 @@ export interface ServerMember {
   roleId?: string;
   user: User;
 }
+
+export interface VoiceState {
+  channelId: string;
+  isMuted: boolean;
+  isConnecting: boolean;
+  isConnected: boolean;
+  participants: VoiceParticipant[];
+  error?: string;
+}
+
+export interface VoiceParticipant {
+  userId: string;
+  username: string;
+  speaking?: boolean;
+}

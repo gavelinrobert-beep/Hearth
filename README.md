@@ -33,6 +33,7 @@ A modern, full-stack Discord alternative with AI-powered moderation and assistan
 ### 💬 Core Communication
 - **Real-time Messaging** - Instant message delivery with Socket.IO WebSocket connections and automatic reconnection
 - **Server & Channel Management** - Create unlimited servers with organized text channels and categories
+- **Voice Channels** - WebRTC-powered voice communication with mediasoup for low-latency audio streaming
 - **Direct Messaging** - Private one-on-one conversations with message history and read receipts
 - **Typing Indicators** - Real-time visual feedback when users are composing messages
 - **User Presence** - Online/offline/away status tracking across all servers
@@ -354,6 +355,12 @@ UPLOAD_DIR=./uploads
 
 # CORS
 CORS_ORIGIN=http://localhost:5173
+
+# WebRTC Voice (mediasoup)
+MEDIASOUP_WORKERS=1
+MEDIASOUP_ANNOUNCED_IP=
+RTC_MIN_PORT=10000
+RTC_MAX_PORT=10100
 ```
 
 **Important Configuration Notes:**
@@ -362,6 +369,7 @@ CORS_ORIGIN=http://localhost:5173
 - Set `MINIO_USE_SSL=true` in production with proper SSL certificates
 - Adjust `MAX_FILE_SIZE` based on your needs (default: 10MB)
 - For production, use environment-specific `CORS_ORIGIN` values
+- **Voice Channels**: Set `MEDIASOUP_ANNOUNCED_IP` to your public IP for production deployment
 
 ### Frontend Environment Variables
 
@@ -505,6 +513,115 @@ Once configured, Hearth will provide:
 - Ensure 8GB+ RAM for smooth operation
 - GPU acceleration significantly improves response time
 - Consider cloud AI (Claude) for production at scale
+
+## 🎙️ Voice Channels Setup
+
+Hearth includes WebRTC-powered voice channels using mediasoup for low-latency, high-quality audio communication.
+
+### Local Development
+
+For local development, voice channels work out-of-the-box with default settings:
+
+```bash
+# No additional configuration needed for local development
+# Voice channels will use localhost and ports 10000-10100
+```
+
+**Browser Requirements:**
+- Chrome, Firefox, Safari, or Edge (latest versions)
+- HTTPS is required for getUserMedia (except on localhost)
+- Microphone permissions must be granted
+
+### Production Deployment
+
+For production, you need to configure the public IP address:
+
+1. **Set the announced IP** in `backend/.env`:
+   ```env
+   MEDIASOUP_ANNOUNCED_IP=your.public.ip.address
+   ```
+
+2. **Open firewall ports** for UDP/TCP traffic:
+   ```bash
+   # UFW (Ubuntu/Debian)
+   sudo ufw allow 10000:10100/udp
+   sudo ufw allow 10000:10100/tcp
+   
+   # firewalld (CentOS/RHEL)
+   sudo firewall-cmd --permanent --add-port=10000-10100/udp
+   sudo firewall-cmd --permanent --add-port=10000-10100/tcp
+   sudo firewall-cmd --reload
+   ```
+
+3. **Docker deployment** - Ports are already exposed in `docker-compose.yml`:
+   ```yaml
+   ports:
+     - "3000:3000"
+     - "10000-10100:10000-10100/udp"
+     - "10000-10100:10000-10100/tcp"
+   ```
+
+4. **HTTPS requirement** - Voice channels require HTTPS in production:
+   ```bash
+   # Use a reverse proxy like Nginx with Let's Encrypt
+   # Example Nginx config:
+   server {
+       listen 443 ssl http2;
+       server_name yourdomain.com;
+       
+       ssl_certificate /etc/letsencrypt/live/yourdomain.com/fullchain.pem;
+       ssl_certificate_key /etc/letsencrypt/live/yourdomain.com/privkey.pem;
+       
+       location / {
+           proxy_pass http://localhost:3000;
+           proxy_http_version 1.1;
+           proxy_set_header Upgrade $http_upgrade;
+           proxy_set_header Connection 'upgrade';
+           proxy_set_header Host $host;
+           proxy_cache_bypass $http_upgrade;
+       }
+   }
+   ```
+
+### Using Voice Channels
+
+1. **Create a voice channel** in your server settings
+2. **Click the voice channel** to join
+3. **Grant microphone permissions** when prompted
+4. **Use controls** to mute/unmute or disconnect
+5. **See participants** and their connection status
+
+### Environment Variables
+
+```env
+# Number of mediasoup workers (default: 1, recommended: number of CPU cores)
+MEDIASOUP_WORKERS=1
+
+# Public IP address for WebRTC (required for production)
+MEDIASOUP_ANNOUNCED_IP=
+
+# RTC port range for voice traffic (must be open in firewall)
+RTC_MIN_PORT=10000
+RTC_MAX_PORT=10100
+```
+
+### Troubleshooting
+
+**Cannot connect to voice:**
+- Ensure ports 10000-10100 are open in your firewall
+- Verify `MEDIASOUP_ANNOUNCED_IP` is set to your public IP
+- Check browser microphone permissions
+- Ensure HTTPS is enabled (production only)
+
+**No audio from other users:**
+- Check browser console for errors
+- Verify other users have granted microphone permissions
+- Test with another user to isolate the issue
+
+**High latency or audio quality issues:**
+- Check network connection quality
+- Increase `MEDIASOUP_WORKERS` for better performance
+- Verify sufficient server resources (CPU/bandwidth)
 
 ## 📚 API Documentation
 

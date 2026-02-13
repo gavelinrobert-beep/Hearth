@@ -76,8 +76,15 @@ services:
       MINIO_USE_SSL: "false"
       MAX_FILE_SIZE: 10485760
       CORS_ORIGIN: http://localhost:5173
+      MEDIASOUP_WORKERS: 1
+      # Set to your server's public IP address for production deployments
+      MEDIASOUP_ANNOUNCED_IP: 
+      RTC_MIN_PORT: 10000
+      RTC_MAX_PORT: 10100
     ports:
       - "3000:3000"
+      - "10000-10100:10000-10100/udp"
+      - "10000-10100:10000-10100/tcp"
     depends_on:
       postgres:
         condition: service_healthy

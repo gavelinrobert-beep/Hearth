@@ -12,8 +12,12 @@ import messageRoutes from './routes/messages';
 import dmRoutes from './routes/directMessages';
 import userRoutes from './routes/users';
 import { setupSocketHandlers } from './sockets';
+import { initVoiceHandlers } from './sockets/voiceHandler';
 import { connectRedis } from './config/redis';
 import rateLimit from 'express-rate-limit';
+
+const MediaServer = require('./voice/mediaserver');
+const { RoomManager } = require('./voice/roomManager');
 
 dotenv.config();
 
@@ -80,10 +84,28 @@ async function startServer() {
     await connectRedis();
     console.log('✓ Redis connected');
 
+    // Initialize mediasoup
+    const mediaServer = new MediaServer();
+    const roomManager = new RoomManager();
+    const numWorkers = parseInt(process.env.MEDIASOUP_WORKERS || '1');
+    await mediaServer.init(numWorkers);
+    console.log('✓ mediasoup initialized');
+
+    // Initialize voice handlers with mediaServer and roomManager
+    initVoiceHandlers(mediaServer, roomManager);
+
     // Start server
     httpServer.listen(PORT, () => {
       console.log(`✓ Server running on port ${PORT}`);
       console.log(`✓ Environment: ${process.env.NODE_ENV}`);
+    });
+
+    // Graceful shutdown
+    process.on('SIGTERM', async () => {
+      console.log('SIGTERM received, closing gracefully...');
+      await mediaServer.close();
+      roomManager.closeAll();
+      process.exit(0);
     });
   } catch (error) {
     console.error('Failed to start server:', error);
